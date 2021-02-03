@@ -7,10 +7,10 @@
 
 using namespace std;
 
-int s = 1000;              //количество частиц
-double dt = 0.01;        //время перерасчета
-int S = 80;                //половина длины ребра куба
-int N = 500000;            //количество итераций
+int s = 1000;             //количество частиц
+double dt = 0.01;         //время перерасчета
+int S = 9;                //половина длины ребра куба
+int N = 10000;            //количество итераций
 double epsilon = 1;
 double sigma = 1;
 double T = 0.2;
@@ -26,11 +26,10 @@ double modulation(double x){
 
 double rmin(double *x, double *y, double *z, int NOW){
     double rmin = 100;
-    for (int i = 0; i < NOW; i++)
-        for (int j = 0; j < i; j++){
-            double rx = modulation(x[i] - x[j]);
-            double ry = modulation(y[i] - y[j]);
-            double rz = modulation(z[i] - z[j]);
+        for (int j = 0; j < NOW; j++){
+            double rx = modulation(x[NOW] - x[j]);
+            double ry = modulation(y[NOW] - y[j]);
+            double rz = modulation(z[NOW] - z[j]);
 
             double r = rx * rx + ry * ry + rz * rz;
             
@@ -76,6 +75,7 @@ int main(){
             z[i] = ((double)rand() / RAND_MAX)*2*(S - Rmin) - (S - Rmin);
             
             rm = rmin(x,y,z,i);
+            cout << x[i] << " " << y[i] << " " << z[i] << " " << rm << endl;
         }
         cout << rmin(x,y,z,i) << " " << i << endl;
     }
@@ -83,7 +83,7 @@ int main(){
 //температура
     for (int i = 0; i<s; i++){
          double V = pow(3*T, 0.5);
-        double ranx = ((double)rand() / RAND_MAX)*2*S - S;
+         double ranx = ((double)rand() / RAND_MAX)*2*S - S;
          double rany = ((double)rand() / RAND_MAX)*2*S - S;
          double ranz = ((double)rand() / RAND_MAX)*2*S - S;
          double ran = pow(ranx * ranx + rany * rany + ranz * ranz, 0.5);
@@ -119,11 +119,11 @@ int main(){
                 ay[j] = ay[j] + a * ry;
                 az[j] = az[j] + a * rz;
                     
-                Ep = Ep + 24*epsilon*(pow((sigma/r), 6) - pow((sigma/r), 3));
+                Ep = Ep + 4*epsilon*(pow((sigma/r), 6) - pow((sigma/r), 3));
             }
         }
         
-        if (ch % 1000 == 0){
+        if (ch % 100 == 0){
             fout1 << s << "\n" << ch << "\n";
             for (int i = 0; i < s; i++)
                 fout1 << i << "\t" << x[i] << "\t" << y[i] << "\t" << z[i] << "\n";
@@ -156,12 +156,12 @@ int main(){
             az[i] = 0;
             
             dif = dif + ((x[i] - xnach[i])) * ((x[i] - xnach[i])) + ((y[i] - ynach[i])) * ((y[i] - ynach[i])) + ((z[i] - znach[i])) * ((z[i] - znach[i]));
-            Ekin = Ekin + modulation((x[i] - xpr[i])) * modulation((x[i] - xpr[i])) + modulation((y[i] - ypr[i])) * modulation((y[i] - ypr[i])) + modulation((z[i] - zpr[i])) * modulation((z[i] - zpr[i]))/(2 * dt * dt);
+            Ekin = Ekin + (modulation((x[i] - xpr[i])) * modulation((x[i] - xpr[i])) + modulation((y[i] - ypr[i])) * modulation((y[i] - ypr[i])) + modulation((z[i] - zpr[i])) * modulation((z[i] - zpr[i])))/(2 * dt * dt);
         }
         if (ch % 10 == 0){
         fout2 << ch << "," << fixed << Ep << "," << fixed << Ekin << "," << fixed << Ekin + Ep << "\n";
         fout4 << ch << "," << fixed << dif / s << "\n";
-        fout5 << ch << "," << fixed << Ekin / (3*s) << "\n";
+        fout5 << ch << "," << fixed << 2*Ekin / (3*s) << "\n";
         }
  
         Ekin = 0;
@@ -178,7 +178,7 @@ int main(){
     double B = 0;
     for (int j = 0; j < s; j++){
         for (int i = 0; i < s; i++)
-            if ((V[i] <= B + 50 * A) and (V[i] >= B - 50 * A))
+            if ((V[i] <= B) and (V[i] >= B - A))
                 nV[j] ++;
         B += A;
     }
@@ -195,3 +195,8 @@ int main(){
     cout << difftime(end, start) << endl;
     return 0;
 }
+
+
+// починить генерацию
+// шаг для Максвелла сделать более сбалланчированным
+// разобраться с диффузией
