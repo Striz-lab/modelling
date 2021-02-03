@@ -64,6 +64,7 @@ def Energy():
     fig, ax = plt.subplots()
     ax.plot([float(r[0]) for r in rdr], [float(r[1]) for r in rdr], '.', color='tab:blue')
     ax.plot([float(r[0]) for r in rdr], [float(r[2]) for r in rdr], '.', color='tab:red')
+    
     ax.plot([float(r[0]) for r in rdr], [float(r[3]) for r in rdr], '.', color='tab:purple')
     ax.grid(linestyle='--', linewidth=0.5)
 
@@ -76,8 +77,29 @@ def Energy():
         
     plt.show()
     fig.savefig('Energy.png')
+    
+    
+def Temperature():
+    with open('Temperature.csv'.format(1), 'r') as f:
+        reader = csv.reader(f)
+        rdr = [list(read) for read in reader][3::]
+
+    fig, ax = plt.subplots()
+    ax.plot([float(r[0]) for r in rdr], [float(r[1]) for r in rdr], 'r.-')
+    ax.grid(linestyle='--', linewidth=0.5)
+    
+    ax.xaxis.set_minor_locator(AutoMinorLocator())
+    ax.yaxis.set_minor_locator(AutoMinorLocator())
+    
+    ax.set_ylabel(r'$<\bigtriangleup r>$')
+    ax.set_xlabel(r'$t$')
+    ax.set_title('температура от времени')
+        
+    plt.show()
+    fig.savefig('Temperature.png')
 
 Diffusion()
 Maxwell()
 Energy()
+Temperature()
 
