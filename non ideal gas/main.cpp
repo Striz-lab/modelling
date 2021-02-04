@@ -8,20 +8,29 @@
 using namespace std;
 
 int s = 1000;             //количество частиц
-double dt = 0.01;         //время перерасчета
-int S = 9;                //половина длины ребра куба
-int N = 10000;            //количество итераций
+double dt = 0.0001;         //время перерасчета
+double S = 8;                 //половина длины ребра куба
+int N = 500000;            //количество итераций
 double epsilon = 1;
 double sigma = 1;
-double T = 0.2;
-double Rmin = 0.72;  //минимально допустимое расстояние для генерации (квадрат, линейно -- 0.83)
+double T = 3;
+double Rmin = 0.7;  //минимально допустимое расстояние для генерации (квадрат, линейно -- 0.83)
 
 double modulation(double x){
-    if (x > S)
+    if (x > S){
         x = x - 2 * S;
-    if (x < -S)
+    }
+    if (x < -S){
         x = x + 2 * S;
+    }
     return x;
+}
+
+
+double correction(double x, double y){
+    if (abs(x) > S)
+        y = y - 2 * S;
+    return y;
 }
 
 double rmin(double *x, double *y, double *z, int NOW){
@@ -75,7 +84,7 @@ int main(){
             z[i] = ((double)rand() / RAND_MAX)*2*(S - Rmin) - (S - Rmin);
             
             rm = rmin(x,y,z,i);
-            cout << x[i] << " " << y[i] << " " << z[i] << " " << rm << endl;
+            //cout << x[i] << " " << y[i] << " " << z[i] << " " << rm << endl;
         }
         cout << rmin(x,y,z,i) << " " << i << endl;
     }
@@ -123,7 +132,7 @@ int main(){
             }
         }
         
-        if (ch % 100 == 0){
+        if (ch % 1000 == 0){
             fout1 << s << "\n" << ch << "\n";
             for (int i = 0; i < s; i++)
                 fout1 << i << "\t" << x[i] << "\t" << y[i] << "\t" << z[i] << "\n";
@@ -147,15 +156,22 @@ int main(){
             ypr[i] = Y;
             zpr[i] = Z;
             
+            xnach[i] = correction(x[i] - xpr[i], xnach[i]);
+            ynach[i] = correction(y[i] - ypr[i], ynach[i]);
+            znach[i] = correction(z[i] - zpr[i], znach[i]);
+            
             x[i] = modulation(x[i]);
             y[i] = modulation(y[i]);
             z[i] = modulation(z[i]);
+            
+            
             
             ax[i] = 0;
             ay[i] = 0;
             az[i] = 0;
             
             dif = dif + ((x[i] - xnach[i])) * ((x[i] - xnach[i])) + ((y[i] - ynach[i])) * ((y[i] - ynach[i])) + ((z[i] - znach[i])) * ((z[i] - znach[i]));
+            
             Ekin = Ekin + (modulation((x[i] - xpr[i])) * modulation((x[i] - xpr[i])) + modulation((y[i] - ypr[i])) * modulation((y[i] - ypr[i])) + modulation((z[i] - zpr[i])) * modulation((z[i] - zpr[i])))/(2 * dt * dt);
         }
         if (ch % 10 == 0){
@@ -174,16 +190,17 @@ int main(){
         nV[i] = 0;
     }
     sort(V.begin(), V.end());
-    double A = - (V[0] - V[s - 1])/s;
+    double A = (V[s - 1] - V[0])/s;
     double B = 0;
     for (int j = 0; j < s; j++){
         for (int i = 0; i < s; i++)
-            if ((V[i] <= B) and (V[i] >= B - A))
+            if ((V[i] <= B +  20*A) and (V[i] >= B - 20*A))
                 nV[j] ++;
         B += A;
     }
     for (int i = 0; i < s; i++)
-        fout3 << i * A << "," << nV[i] << "\n"; //Максвелл конец
+        if (nV[i] < 400)
+            fout3 << i * A << "," << nV[i] << "\n"; //Максвелл конец
 
     fout1.close();
     fout2.close();
@@ -195,8 +212,3 @@ int main(){
     cout << difftime(end, start) << endl;
     return 0;
 }
-
-
-// починить генерацию
-// шаг для Максвелла сделать более сбалланчированным
-// разобраться с диффузией

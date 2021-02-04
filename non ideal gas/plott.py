@@ -36,7 +36,7 @@ def Maxwell():
 
     fig, ax = plt.subplots(1, 1, figsize=(8, 4), sharey=True)
     ax.bar([float(r[0]) for r in rdr], [float(r[1]) for r in rdr])
-    #ax.plot( [(float(r[0])**2) for r in rdr],[np.log1p((float(r[1])/(float(r[0])**2))) for r in rdr], '.')
+    #ax.plot( [np.log1p((float(r[1])/(float(r[0])**2))) for r in rdr],[(float(r[0])**2) for r in rdr], '.')
     
     #y = ((1 / (np.sqrt(2 * np.pi) * sigma)) * np.exp(-0.5 * (1 / sigma * (bins - mu))**2))
     #ax.plot(bins, y, '--')
