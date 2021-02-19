@@ -14,9 +14,10 @@ Oy -- подпись к оси Оу
 Caption -- подпись к графику
 name -- название сохраненной картинки с расширением
 a -- костыль, позволяющий построить график в нелинейных осях
+k,l -- костыли для распределений максвелла по проекциям скоросей
 '''
 
-def picture(file, n, Ox, Oy, Caption, name, a = 0):
+def picture(file, n, Ox, Oy, Caption, name, a = 0, k = 0, l = 0):
     with open(file + '.csv'.format(1), 'r') as f:
         reader = csv.reader(f)
         rdr = [list(read) for read in reader][3::]
@@ -24,9 +25,13 @@ def picture(file, n, Ox, Oy, Caption, name, a = 0):
     fig, ax = plt.subplots()
     if a == 1:
         ax.plot( [np.log1p((float(r[1]))/(((float(r[0])**2)))) for r in rdr],[(float(r[0])**2) for r in rdr], '.')
+    elif a == 2:
+        for i in range(n):
+            ax.plot([np.log1p(float(r[i+2])) for r in rdr], [(float(r[i + 5])**2) for r in rdr], 'r.-', color='#'+ str(int((i - 1)*(i - 2)*4.5))+ str(0) + str(i*(2 - i)*8) + str(0) + str(i*(i - 1)*4) + str(0))
+    
     else:
         for i in range(n):
-            ax.plot([float(r[0]) for r in rdr], [float(r[i + 1]) for r in rdr], 'r.-', color='#'+ str(int((i - 1)*(i - 2)*4.5))+ str(0) + str(i*(2 - i)*8) + str(0) + str(i*(i - 1)*4) + str(0))
+            ax.plot([float(r[0 + int(l * i / 5) + l]) for r in rdr], [float(r[i + 1 + k]) for r in rdr], 'r.-', color='#'+ str(int((i - 1)*(i - 2)*4.5))+ str(0) + str(i*(2 - i)*8) + str(0) + str(i*(i - 1)*4) + str(0))
             
     ax.grid(linestyle='--', linewidth=0.5)
     
@@ -41,8 +46,36 @@ def picture(file, n, Ox, Oy, Caption, name, a = 0):
 
 
 picture('Diffusion', 1, r'$t$', r'$<\Delta r^2>$', 'Диффузия', 'Diffusion.png')
+'''
 picture('Velocities', 1, r'$V$', r'$N$', 'Распределение Максвелла по модулям скоростей', 'Maxwell.png')
 picture('Velocities', 1, r'$V^2$', r'$\ln{\frac{N}{V^2}}$', 'Линеаризованное распределение Максвелла по модулям скоростей', 'Maxwell_lin.png', 1)
 picture('Energy', 3, r'$t$', r'$E$', 'Зависимость энергии от времени', 'Energy.png')
 picture('Temperature', 1, r'$t$', r'$T$', 'Зависимость температуры от времени', 'Temperature.png')
 
+
+picture('Velocities', 3, r'$V_i$', r'$N$', 'Распределение Максвелла по проекциям скоростей', 'Maxwell_pr.png', 0, 1, 5)
+picture('Velocities', 3, r'$V_i^2$', r'$\ln{N}$', 'Линеаризованное распределение Максвелла по проекциям скоростей', 'Maxwell_pr_lin.png', 2, 5)
+
+picture('Fluctuation', 1, r'$t$', r'$<E^2> - <E>^2$', 'Флуктуации энергии', 'Fluctuation.png')
+'''
+'''
+
+with open('Fluctuation.csv'.format(1), 'r') as f:
+    reader = csv.reader(f)
+    rdr = [list(read) for read in reader][3::]
+    
+fig, ax = plt.subplots()
+ax.plot( [float(r[0]) for r in rdr],[(float(r[0])**0.5) for r in rdr], '.')
+
+        
+ax.grid(linestyle='--', linewidth=0.5)
+
+ax.xaxis.set_minor_locator(AutoMinorLocator())
+ax.yaxis.set_minor_locator(AutoMinorLocator())
+ax.set_ylabel('Oy')
+ax.set_xlabel('Ox')
+ax.set_title('Caption')
+        
+plt.show()
+fig.savefig(name.png)
+'''
